@@ -7,13 +7,13 @@ local savedValues = {}
 local startTime = os.time()
 local PASSWORD = "TUX3T"
 local fancyMessages = {
-    "محمد الشمري يرحب بكم",
+    "محمد",
 }
 local ONLINE_CHECK_URL = "https://raw.githubusercontent.com/karar-les/script-control9/refs/heads/main/expiry.txt"
 local SCRIPT_STATUS_URL = "https://raw.githubusercontent.com/karar-les/script-control9/refs/heads/main/status.txt"
 local UPDATE_URL = "https://raw.githubusercontent.com/karar-les/script-control9/refs/heads/main/script.lua"
 local VERSION_URL = "https://raw.githubusercontent.com/karar-les/script-control9/refs/heads/main/version.txt"
-local CURRENT_VERSION = "1.0" -- قم بتغيير هذا عند كل تحديث
+local CURRENT_VERSION = "1.1" -- قم بتغيير هذا عند كل تحديث
 
 -- دالة استعادة القيم الأصلية
 function restoreOriginalValues()
