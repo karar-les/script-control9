@@ -13,7 +13,7 @@ local ONLINE_CHECK_URL = "https://raw.githubusercontent.com/karar-les/script-con
 local SCRIPT_STATUS_URL = "https://raw.githubusercontent.com/karar-les/script-control9/refs/heads/main/status.txt"
 local UPDATE_URL = "https://raw.githubusercontent.com/karar-les/script-control9/refs/heads/main/script.lua"
 local VERSION_URL = "https://raw.githubusercontent.com/karar-les/script-control9/refs/heads/main/version.txt"
-local CURRENT_VERSION = "1.2" -- قم بتغيير هذا عند كل تحديث
+local CURRENT_VERSION = "1.3" -- قم بتغيير هذا عند كل تحديث
 
 -- دالة لإنشاء مجلد إذا لم يكن موجودا
 function createFolderIfNotExists(folderPath)
@@ -118,25 +118,7 @@ function checkForUpdates()
     return false, "أنت تستخدم أحدث إصدار ("..CURRENT_VERSION..")"
 end
 
--- دالة الحصول على رقم الإصدار التالي للملف
-function getNextScriptNumber()
-    local folderPath = gg.EXT_STORAGE.."/اونلاين/"
-    createFolderIfNotExists(folderPath)
-    
-    local maxNumber = 0
-    for file in io.popen('ls "'..folderPath..'"'):lines() do
-        local number = file:match("script(%d+)%.lua")
-        if number then
-            number = tonumber(number)
-            if number > maxNumber then
-                maxNumber = number
-            end
-        end
-    end
-    return maxNumber + 1
-end
-
--- دالة التحديث التلقائي
+-- دالة التحديث التلقائي المعدلة
 function performUpdate()
     local hasUpdate, message = checkForUpdates()
     if not hasUpdate then
@@ -149,29 +131,37 @@ function performUpdate()
     
     local success, result = pcall(gg.makeRequest, UPDATE_URL)
     if not success or not result or not result.content then
-        gg.alert("فشل في تحميل السكربت المحدث")
+        gg.alert("❌ فشل في تحميل السكربت المحدث!")
         return
     end
     
-    -- إنشاء مجلد اونلاين إذا لم يكن موجودا
-    local folderPath = gg.EXT_STORAGE.."/اونلاين/"
-    createFolderIfNotExists(folderPath)
+    -- إنشاء مجلد اونلاين إذا لم يكن موجودًا
+    local folderPath = "/storage/emulated/0/اونلاين/"
+    if not io.open(folderPath, "r") then
+        os.execute("mkdir -p '"..folderPath.."'")
+        gg.toast("📂 تم إنشاء مجلد التحديثات: "..folderPath)
+    end
     
-    -- الحصول على رقم الإصدار التالي
-    local nextNumber = getNextScriptNumber()
-    local filePath = folderPath.."script"..nextNumber..".lua"
+    -- تحديد اسم الملف (سيحفظ دائمًا كـ script.lua)
+    local filePath = folderPath.."script.lua"
+    
+    -- حذف الملف القديم إذا كان موجودًا
+    if io.open(filePath, "r") then
+        os.remove(filePath)
+    end
     
     local file = io.open(filePath, "w")
+    
     if not file then
-        gg.alert("فشل في إنشاء ملف التحديث")
+        gg.alert("❌ فشل في حفظ الملف المحدث!")
         return
     end
     
     file:write(result.content)
     file:close()
     
-    gg.alert("تم تنزيل التحديث بنجاح في:\n"..filePath.."\n\nسيتم تشغيل الإصدار الجديد الآن")
-    gg.loadFile(filePath)
+    gg.alert("✅ تم التحديث بنجاح!\n\nتم حفظ الملف في:\n"..filePath.."\n\nسيتم تشغيل الإصدار الجديد الآن.")
+    gg.loadFile(filePath)  -- تشغيل السكربت المُحدَّث تلقائيًا
 end
 
 -- دالة عرض معلومات المطور
